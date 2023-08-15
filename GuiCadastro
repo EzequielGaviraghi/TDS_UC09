@@ -1,0 +1,75 @@
+package br.com.senac.view;
+
+import br.com.senac.infra.ConexaoMysql;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+
+public class CadastroMain {
+    private JLabel lbNome;
+    private JLabel lbEmail;
+    private JLabel lbTelefone;
+    private JLabel lbSexo;
+    private JRadioButton radioButtonFeminino;
+    private JRadioButton radioButtonMasculino;
+    private JButton buttonCadastrar;
+    private JButton buttonLimpar;
+    private JTextField textField1;
+    private JTextField textField2;
+    private JTextField textField3;
+    private JPanel CadastroOficial;
+
+    public CadastroMain() {
+        ButtonGroup buttonGroup = new ButtonGroup();
+        buttonGroup.add(radioButtonFeminino);
+        buttonGroup.add(radioButtonMasculino);
+
+        buttonCadastrar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ConexaoMysql conexaoMysql = new ConexaoMysql();
+                Connection con = null;
+                try {
+                    con = conexaoMysql.obterConexao();
+                } catch (ClassNotFoundException ex) {
+                    throw new RuntimeException(ex);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+                PreparedStatement stmt = null;
+
+
+                try {
+                    stmt = con.prepareStatement("INSERT INTO tb_pessoa(nome, email, telefone, sexo) VALUES(?, ?, ?, ?)");
+                    stmt.setString(1, textField1.getText());
+                    stmt.setString(2, textField2.getText());
+                    stmt.setString(3, textField3.getText());
+                    int sexo = radioButtonFeminino.isSelected() ? 1 : 2;
+                    stmt.setInt(4, sexo);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+
+                try {
+                    stmt.executeUpdate();
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+
+            }
+        });
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("CadastroMain");
+        frame.setContentPane(new CadastroMain().CadastroOficial);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setVisible(true);
+    }
+}
